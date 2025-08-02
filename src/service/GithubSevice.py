@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 import requests
 import time
-
+from model.Repository import Repository
 
 class GithubService():
     def __init__(self):
@@ -33,7 +33,6 @@ class GithubService():
                     'sha': commit_sha,
                     'url': commit_url
                 })
-                time.sleep(0.3)
             return results
         else:
             error_msg = f"Error {response.status_code}: {response.json().get('message', 'No se pudo obtener información del repositorio')}"
@@ -46,16 +45,8 @@ class GithubService():
             repositories_data = response.json()
             results = []
             for repo in repositories_data:
-                repo_name = repo['name']
-                repo_owner = repo['owner']['login']
-                repo_url = repo['html_url']
-                repo_description = repo.get('description', 'No description')
-                results.append({
-                    'name': repo_name,
-                    'owner': repo_owner,
-                    'url': repo_url,
-                    'description': repo_description
-                })
+                repo = Repository(repo['name'], repo['owner']['login'], repo['html_url'], repo.get('description', 'No description'))
+                results.append(repo)
                 time.sleep(0.3)
             return results
         else:

@@ -8,7 +8,7 @@ def show_bar(thread):
     with alive_bar(title='Procesando...', stats=False, elapsed=False, spinner='dots') as bar:
         while thread.is_alive():
             bar()
-            time.sleep(0.5)
+            time.sleep(0.1)
 
 def select_option():
     options = ["get-user-starred-repositories", "exit"]
@@ -34,9 +34,9 @@ def main():
         thread.join()
         if isinstance(results, list):
             for repo in results:
-                print(f"⭐ {repo['owner']}/{repo['name']} - {repo['url']}")
-                if repo['description'] != 'No description':
-                    print(f"   📝 {repo['description']}")
+                print(f"⭐ {repo.owner}/{repo.name} - {repo.url}")
+                if repo.description != 'No description':
+                    print(f"   📝 {repo.description}")
                 print()
         elif isinstance(results, dict) and 'error' in results:
             print(results['error'])
