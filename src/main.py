@@ -1,30 +1,46 @@
 from service.GithubSevice import GithubService
-import sys 
 import threading
 import time
 from alive_progress import alive_bar
+from InquirerPy import inquirer
+
+def show_bar(thread):
+    with alive_bar(title='Procesando...', stats=False, elapsed=False, spinner='dots') as bar:
+        while thread.is_alive():
+            bar()
+            time.sleep(0.5)
+
+def select_option():
+    options = ["get-user-starred-repositories", "exit"]
+    option = inquirer.rawlist(
+    message="Select an option:", default=2, choices=options
+).execute()
+    return option
 
 def main():
-    if len(sys.argv) == 4 and sys.argv[1] == '--commits':
-        owner = sys.argv[2]
-        repo = sys.argv[3]
-        
-        def fetch_commits():
-            github_service = GithubService()
-            github_service.get_all_commits(owner=owner, repo=repo)
+    github_service = GithubService()
+    results = []
 
-        def show_bar(thread):
-            with alive_bar(title='Procesando...') as bar:
-                while thread.is_alive():
-                    bar()
-                    time.sleep(0.1)
+    def fetch_user_starred_repositories():
+        nonlocal results
+        results = github_service.get_user_starred_repositories(user)
 
-        hilo = threading.Thread(target=fetch_commits)
-        hilo.start()
-        show_bar(hilo)
-
-        hilo.join()        
-        print("¡Listo!")
-   
+    option = select_option()
+    if option == "get-user-starred-repositories":
+        user = input("Dame el nombre del usuario\n")
+        thread = threading.Thread(target=fetch_user_starred_repositories)
+        thread.start()
+        show_bar(thread)
+        thread.join()
+        if isinstance(results, list):
+            for repo in results:
+                print(f"⭐ {repo['owner']}/{repo['name']} - {repo['url']}")
+                if repo['description'] != 'No description':
+                    print(f"   📝 {repo['description']}")
+                print()
+        elif isinstance(results, dict) and 'error' in results:
+            print(results['error'])
+    elif option == "exit":
+        print("Thanks for using ❤️")
 if __name__ == "__main__":
     main()
