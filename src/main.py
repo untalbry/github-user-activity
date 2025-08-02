@@ -11,7 +11,7 @@ def show_bar(thread):
             time.sleep(0.1)
 
 def select_option():
-    options = ["get-user-starred-repositories", "exit"]
+    options = ["get-user-starred-repositories", "get-user-events", "exit"]
     option = inquirer.rawlist(
     message="Select an option:", default=2, choices=options
 ).execute()
@@ -24,6 +24,9 @@ def main():
     def fetch_user_starred_repositories():
         nonlocal results
         results = github_service.get_user_starred_repositories(user)
+    def fetch_user_events():
+        nonlocal results
+        results = github_service.get_user_events(user)
 
     option = select_option()
     if option == "get-user-starred-repositories":
@@ -39,6 +42,17 @@ def main():
                     print(f"   📝 {repo.description}")
                 print()
         elif isinstance(results, dict) and 'error' in results:
+            print(results['error'])
+    elif option == "get-user-events":
+        user = input("Dame el nombre del usuario\n")
+        thread = threading.Thread(target=fetch_user_events)
+        thread.start()
+        show_bar(thread)
+        thread.join()
+        if isinstance(results, list):
+            for event in results:
+                print(f"Event:{event.type}\nAt:{event.repo_name}\nCreated at:{event.created_at}\n")
+        elif isinstance(result, dict) and 'error' in results:
             print(results['error'])
     elif option == "exit":
         print("Thanks for using ❤️")

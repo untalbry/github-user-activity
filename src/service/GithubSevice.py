@@ -4,6 +4,7 @@ import os
 import requests
 import time
 from model.Repository import Repository
+from model.Event import Event
 
 class GithubService():
     def __init__(self):
@@ -47,8 +48,21 @@ class GithubService():
             for repo in repositories_data:
                 repo = Repository(repo['name'], repo['owner']['login'], repo['html_url'], repo.get('description', 'No description'))
                 results.append(repo)
-                time.sleep(0.3)
             return results
         else:
             error_msg = f'Error {response.status_code}: {response.json().get("message", "No se pudo obtener información del usuario")}'
             return {'error': error_msg}
+    def get_user_events(self, user):
+        url = f'https://api.github.com/users/{user}/events'
+        response = requests.get(url, headers=self.headers)
+        if response.status_code == 200: 
+            repositories_data = response.json()
+            results = []
+            for event in repositories_data:
+                event = Event(type=event['type'], repo_name=event['repo']['name'], created_at=event['created_at'])
+                results.append(event)
+            return results 
+        else:
+            error_msg = f'Error {response.status_code}: {response.json().get("message", "No se pudo obtener información del usuario")}'
+            return {'error': error_msg}
+
