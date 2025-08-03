@@ -2,7 +2,6 @@
 from dotenv import load_dotenv
 import os
 import requests
-import time
 from model.Repository import Repository
 from model.Event import Event
 
@@ -18,26 +17,6 @@ class GithubService():
             'Authorization': f'token {self.token}',
             'Accept': 'application/vnd.github.v3+json'
         }
-
-    def get_all_commits(self, owner, repo):
-        url = f'https://api.github.com/repos/{owner}/{repo}/commits'
-        response = requests.get(url, headers=self.headers)
-        if response.status_code == 200:
-            commits_data = response.json()
-            results = []
-            for c in commits_data:
-                commit_message = c['commit']['message']
-                commit_sha = c['sha']
-                commit_url = f'https://github.com/{owner}/{repo}/commit/{commit_sha}'
-                results.append({
-                    'message': commit_message,
-                    'sha': commit_sha,
-                    'url': commit_url
-                })
-            return results
-        else:
-            error_msg = f"Error {response.status_code}: {response.json().get('message', 'No se pudo obtener información del repositorio')}"
-            return {'error': error_msg}
 
     def get_user_starred_repositories(self, user):
         url = f'https://api.github.com/users/{user}/starred'
@@ -59,8 +38,8 @@ class GithubService():
             repositories_data = response.json()
             results = []
             for event in repositories_data:
-                event = Event(type=event['type'], repo_name=event['repo']['name'], created_at=event['created_at'])
-                results.append(event)
+                event_fetched = Event(type=event['type'], repo_name=event['repo']['name'], created_at=event['created_at'],size=event['payload'].get('size', 0))
+                results.append(event_fetched)
             return results 
         else:
             error_msg = f'Error {response.status_code}: {response.json().get("message", "No se pudo obtener información del usuario")}'

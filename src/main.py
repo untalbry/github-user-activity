@@ -51,8 +51,11 @@ def main():
         thread.join()
         if isinstance(results, list):
             for event in results:
-                print(f"Event:{event.type}\nAt:{event.repo_name}\nCreated at:{event.created_at}\n")
-        elif isinstance(result, dict) and 'error' in results:
+                if event.type == "PushEvent":
+                    print(f"Pushed {event.size} commits to {event.repo_name}\n")
+                else:
+                    print(f"Event:{event.type}\nAt:{event.repo_name}\nCreated at:{event.created_at}\n")
+        elif isinstance(results, dict) and 'error' in results:
             print(results['error'])
     elif option == "exit":
         print("Thanks for using ❤️")
