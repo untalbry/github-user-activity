@@ -38,7 +38,7 @@ class GithubService():
             repositories_data = response.json()
             results = []
             for event in repositories_data:
-                event_fetched = Event(type=event['type'], repo_name=event['repo']['name'], created_at=event['created_at'],size=event['payload'].get('size', 0))
+                event_fetched = Event(type=event['type'], repo_name=event['repo']['name'], created_at=event['created_at'],commits=event['payload'].get('size', 0), branch=event['payload'].get('ref', 0))
                 results.append(event_fetched)
             return results 
         else:

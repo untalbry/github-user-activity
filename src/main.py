@@ -51,8 +51,14 @@ def main():
         thread.join()
         if isinstance(results, list):
             for event in results:
+                print(f'{type(event.branch)}')
                 if event.type == "PushEvent":
-                    print(f"Pushed {event.size} commits to {event.repo_name}\n")
+                    print(f"Pushed {event.commits} commits to {event.repo_name}\n")
+                elif event.type == "CreateEvent":
+                    if event.branch is None:
+                        print(f"Created new repository called {event.repo_name}")
+                    else:   
+                        print(f"Created new branch called {event.branch} into {event.repo_name}")
                 else:
                     print(f"Event:{event.type}\nAt:{event.repo_name}\nCreated at:{event.created_at}\n")
         elif isinstance(results, dict) and 'error' in results:
